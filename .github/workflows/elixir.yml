@@ -37,6 +37,7 @@ jobs:
         restore-keys: ${{ runner.os }}-mix-
 
     - name: Install Visual C++
+      if: runner.os == 'Windows'
       run: choco install VisualCppBuildTools
         
     - name: Install dependencies
