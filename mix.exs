@@ -64,6 +64,7 @@ defmodule BreakingCues.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.deploy": [
+        "cmd --cd assets npm install",
         "cmd --cd assets node build.js --deploy",
         "phx.digest",
         "phx.digest"
