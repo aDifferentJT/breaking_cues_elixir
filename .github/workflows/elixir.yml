@@ -49,10 +49,15 @@ jobs:
         MIX_ENV: prod
       run: mix assets.deploy
       
-    - name: Build release
+    - name: Add phoenix to release
       env:
         MIX_ENV: prod
       run: mix phx.gen.release
+      
+    - name: Build release
+      env:
+        MIX_ENV: prod
+      run: mix release
       
     - name: ls
       run: |
