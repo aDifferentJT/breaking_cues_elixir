@@ -1,0 +1,26 @@
+<div style="position: fixed; top: 50%; left: 50%; width: 150px; height: 125px; transform: translate(-50%, -50%);">
+  <div style="position: absolute; top: 0px; right: 0px; width: 50px; height: 50px; border-radius: 50%; background-color: red;">
+    <div
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15px; color: white;"
+      phx-click="close_live"
+    >
+      Close
+    </div>
+  </div>
+  <div style="position: absolute; top: 0px; left: 0px; width: 50px; height: 50px; border-radius: 50%; background-color: red;">
+    <div
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15px; color: white;"
+      phx-click="previous_event"
+    >
+      Prev
+    </div>
+  </div>
+  <div
+    style="position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; border-radius: 50%; background-color: green;"
+    phx-click="next_event"
+  >
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 25px; color: white;">
+      Next
+    </div>
+  </div>
+</div>

@@ -1,0 +1,308 @@
+<!DOCTYPE HTML>
+<html>
+        <head>
+                <script defer type="text/javascript" src="assets/js/output.js"></script>
+                <style>
+#bg {
+        position: fixed;
+        color: white;
+        background-color: #206080C0;
+        overflow: hidden;
+}
+#text {
+        color: white;
+}
+#heading {
+        position: absolute;
+        left: 50px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1620px;
+        height: 100%;
+}
+#title {
+        position: absolute;
+        left: 0px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 50px;
+}
+#subtitle {
+        position: absolute;
+        right: 0px;
+        top: 75%;
+        transform: translateY(-100%);
+        font-size: 30px;
+}
+#slide {
+        position: absolute;
+        left: 0px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1720px;
+}
+#slide_measure {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 1720px;
+        visibility: hidden;
+}
+#arch {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        height: 800px;
+        width: 1920px;
+        overflow: hidden;
+        transform-origin: 50% 0%;
+        transition: transform;
+        transition-duration: 1s;
+}
+#arch_bg {
+        position: absolute;
+        height: 100%;
+        width: 200%;
+        left: -50%;
+        background: radial-gradient(ellipse farthest-side at 50% 100%, transparent 50%, #206080C0 75%);
+}
+#arch_title {
+        position: absolute;
+        left: 50%;
+        top: 12.5%;
+        color: white;
+        text-align: center;
+        font-size: 100px;
+        transform: translate(-50%, -50%);
+}
+#arch_top_left {
+        position: absolute;
+        left: 2.5%;
+        top: 15%;
+        color: white;
+        font-size: 40px;
+        transform: translateY(-50%);
+}
+#arch_top_right {
+        position: absolute;
+        right: 2.5%;
+        top: 15%;
+        color: white;
+        font-size: 40px;
+        text-align: right;
+        transform: translateY(-50%);
+}
+#timer {
+        font-family: monospace;
+}
+#calendar_bg {
+        position: fixed;
+        left: 50%;
+        top: 100px;
+        transform: translateX(-50%);
+        height: 430px;
+        width: 1550px;
+        background-color: #206080C0;
+        border-radius: 15px;
+        overflow: hidden;
+        transform-origin: 0% 0%;
+        transition-property: transform;
+        transition-duration: 0.5s;
+}
+#calendar_title {
+        position: absolute;
+        left: 10px;
+        top: 0px;
+        width: 1530px;
+        height: 200px;
+        line-height: 100px;
+        color: white;
+        text-align: center;
+        font-size: 70px;
+}
+#calendar_body {
+        position: absolute;
+        top: 210px;
+        left: 10px;
+        width: 1530px;
+        height: 210px;
+}
+#calendar_boxes1 {
+        width: 1530px;
+        height: 210px;
+        overflow: hidden;
+        transition-property: width;
+        transition-duration: 0.5s;
+}
+#calendar_boxes2 {
+        transform: translateX(0px);
+        transition-property: transform;
+        transition-duration: 0.5s;
+}
+.calendar_border {
+        position: absolute;
+        top: 0px;
+        height: 200px;
+        width: 200px;
+        border: solid;
+        color: grey;
+        border-color: white;
+        border-width: 5px;
+        border-radius: 5px;
+}
+.calendar_date {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 50px;
+}
+.calendar_day {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 75px;
+}
+#calendar_sun {
+        left: 0px;
+        color: white;
+}
+#calendar_mon {
+        left: 220px;
+}
+#calendar_tues {
+        left: 440px;
+}
+#calendar_wed {
+        left: 660px;
+}
+#calendar_thurs {
+        left: 880px;
+}
+#calendar_fri {
+        left: 1100px;
+}
+#calendar_sat {
+        left: 1320px;
+}
+#calendar_details {
+        position: absolute;
+        top: 50%;
+        left: 400px;
+        transform: translateY(-50%);
+        color: white;
+        font-size: 40px;
+}
+                </style>
+        </head>
+        <body>
+                <div id="bg">
+                        <div id="text">
+                                <div id="heading" style="opacity:0;">
+                                        <div id="title">
+                                        </div>
+                                        <div id="subtitle">
+                                        </div>
+                                </div>
+                                <div id="slide" style="opacity:0;">
+                                </div>
+                        </div>
+                </div>
+                <div id="slide_measure">
+                </div>
+                <div id="arch" style="transform: translateY(-50%) scaleY(0.5);">
+                        <div id="arch_bg">
+                        </div>
+                        <div id="arch_title">
+                                <div id="service_title"></div>
+                        </div>
+                        <div id="arch_top_left">
+                                <div id="subtitle1"></div>
+                                <hr/>
+                                <div id="subtitle2"></div>
+                        </div>
+                        <div id="arch_top_right">
+                                <div id="timer_caption">Compline will start in</div>
+                                <hr/>
+                                <div id="timer"></div>
+                        </div>
+                </div>
+                <div id="calendar_bg" style="transform: scaleX(0);">
+                        <div id="calendar_title">
+                                <div id="calendar_title1">
+                                        Thank you for coming
+                                </div>
+                                <div id="calendar_title2">
+                                        Subscribe so you don't miss our upcoming services
+                                </div>
+                        </div>
+                        <div id="calendar_body">
+                                <div id="calendar_boxes1">
+                                        <div id="calendar_boxes2">
+                                                <div id="calendar_sun" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Sun
+                                                        </div>
+                                                </div>
+                                                <div id="calendar_mon" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Mon
+                                                        </div>
+                                                </div>
+                                                <div id="calendar_tues" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Tues
+                                                        </div>
+                                                </div>
+                                                <div id="calendar_wed" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Wed
+                                                        </div>
+                                                </div>
+                                                <div id="calendar_thurs" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Thurs
+                                                        </div>
+                                                </div>
+                                                <div id="calendar_fri" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Fri
+                                                        </div>
+                                                </div>
+                                                <div id="calendar_sat" class="calendar_border">
+                                                        <div class="calendar_date">
+                                                                27
+                                                        </div>
+                                                        <div class="calendar_day">
+                                                                Sat
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
+                                <div id="calendar_details">
+                                        8:30 - Organ Recital
+                                        <hr/>
+                                        9:00 - Compline
+                                </div>
+                        </div>
+                </div>
+        </body>
+</html>

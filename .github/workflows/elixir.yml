@@ -1,0 +1,74 @@
+name: Elixir CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build release
+    
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1.11.1
+      with:
+        elixir-version: '1.13.4' # Define the elixir version [required]
+        otp-version: '24.3.3' # Define the OTP version [required]
+        
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+        
+    - name: Install dependencies
+      run: mix deps.get
+      
+    - name: Build release
+      env:
+        MIX_ENV: prod
+      run: mix release
+      
+    - name: ls
+      run: |
+        ls _build/prod/rel
+        
+    - name: Get artifacts (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        mkdir release
+        tar -cjf release/breaking_cues_${{runner.os}}.tar.bz2 _build/prod/rel/breaking_cues
+            
+    - name: Get artifacts (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        mkdir release
+        7z a -tzip release/breaking_cues_${{runner.os}}.zip _build/prod/rel/breaking_cues
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: breaking_cues_${{ runner.os }}
+        path: ${{github.workspace}}/_build/prod/rel/breaking_cues
+
+    - name: GH Release
+      if: startsWith(github.ref, 'refs/tags')
+      uses: softprops/action-gh-release@v0.1.13
+      with:
+        # Newline-delimited list of path globs for asset files to upload
+        files: ${{github.workspace}}/release/*

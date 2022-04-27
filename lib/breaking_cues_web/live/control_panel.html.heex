@@ -1,0 +1,690 @@
+<div class="container vh-100 mw-100 p-1">
+  <div class="row h-100">
+    <div class="col mh-100">
+      <div class="card mh-100">
+        <div class="card-header d-flex flex-row align-items-center">
+          <div class="flex-grow-1">
+            Programme
+          </div>
+          <.form
+            let={f}
+            for={:programme_upload}
+            multipart={true}
+            phx-change="programme_upload"
+            style="display: none;"
+          >
+            <%= live_file_input(@uploads.programme) %>
+          </.form>
+          <button class="btn btn-outline-secondary m-1" phx-click="show_settings_modal">
+            <i class="bi bi-gear-fill" />
+          </button>
+          <button
+            class="btn btn-outline-secondary m-1"
+            onclick={"document.getElementById('#{@uploads.programme.ref}').click()"}
+          >
+            <i class="bi bi-upload" />
+          </button>
+          <a
+            class="btn btn-outline-secondary m-1"
+            href="/download/programme.bcp"
+            download="programme.bcp"
+          >
+            <i class="bi bi-download" />
+          </a>
+          <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle m-1" data-bs-toggle="dropdown">
+              <i class="bi bi-plus" />
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" phx-click="add_deck">New</button></li>
+              <li>
+                <button class="dropdown-item" phx-click="show_bible_modal">
+                  Bible
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item" phx-click="show_psalm_modal">
+                  Psalm
+                </button>
+              </li>
+              <li>
+                <.form
+                  let={f}
+                  for={:deck_upload}
+                  multipart={true}
+                  phx-change="deck_upload"
+                  style="display: none;"
+                >
+                  <%= live_file_input(@uploads.deck) %>
+                </.form>
+                <button
+                  class="dropdown-item"
+                  onclick={"document.getElementById('#{@uploads.deck.ref}').click()"}
+                >
+                  Upload
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <ul class="list-group list-group-flush" style="overflow-y: auto">
+          <li
+            class={
+              "list-group-item d-flex flex-row align-items-center #{if @editing_service_details, do: "active"}"
+            }
+            phx-click="edit_service_details"
+          >
+            <div class="flex-grow-1">
+              Service Details
+            </div>
+            <button class={"btn btn-#{if @state.service_details_shown do
+                  ""
+                else
+                  "outline-"
+                end}danger m-1"} phx-click="toggle_service_details">
+              <i class="bi bi-projector-fill" />
+            </button>
+          </li>
+          <%= for id <- @state.deck_order do %>
+            <li
+              class={
+                "list-group-item d-flex flex-row align-items-center #{if @preview_deck_id == id, do: "active"}"
+              }
+              phx-click={JS.push("preview_deck", value: %{id: id})}
+            >
+              <div class="flex-grow-1">
+                <%= @state.decks[id].title %>
+              </div>
+              <a
+                class={"btn btn-sm btn-outline-#{if @preview_deck_id == id do
+                    "light"
+                  else
+                    "dark"
+                  end} m-1"}
+                href={"/download/deck/#{id}.bcd"}
+                download={"#{@state.decks[id].title}.bcd"}
+              >
+                <i class="bi bi-download" />
+              </a>
+              <button class={"btn btn-sm btn-outline-#{if @preview_deck_id == id do
+                    "light"
+                  else
+                    "dark"
+                  end} m-1"} phx-click={JS.push("move-deck-up", value: %{id: id})}>
+                <i class="bi bi-arrow-up" />
+              </button>
+              <button
+                class="btn btn-sm btn-outline-danger m-1"
+                phx-click={JS.push("remove-deck", value: %{id: id})}
+              >
+                <i class="bi bi-x" />
+              </button>
+              <button class={"btn btn-sm btn-outline-#{if @preview_deck_id == id do
+                    "light"
+                  else
+                    "dark"
+                  end} m-1"} phx-click={JS.push("move-deck-down", value: %{id: id})}>
+                <i class="bi bi-arrow-down" />
+              </button>
+              <button
+                class={"btn btn-sm btn-#{if @state.live_deck == @state.decks[id] do
+                    ""
+                  else
+                    "outline-"
+                  end}danger m-1"}
+                phx-click={
+                  if @state.live_deck == @state.decks[id] do
+                    JS.push("close_live")
+                  else
+                    JS.push("go_live", value: %{deck_id: id, slide_id: nil, quiet: false})
+                  end
+                }
+              >
+                <i class="bi bi-projector-fill" />
+              </button>
+            </li>
+          <% end %>
+          <li
+            class={
+              "list-group-item d-flex flex-row align-items-center #{if @editing_upcoming_services, do: "active"}"
+            }
+            phx-click="edit_upcoming_services"
+          >
+            <div class="flex-grow-1">
+              Upcoming Services
+            </div>
+            <button class={"btn btn-#{if @state.upcoming_services_shown do
+                  ""
+                else
+                  "outline-"
+                end}danger m-1"} phx-click="toggle_upcoming_services">
+              <i class="bi bi-projector-fill" />
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col mh-100 d-flex flex-column">
+      <div class="flex-grow-1 flex-shrink-1" style="min-height: 0px;">
+        <%= cond do %>
+          <% @editing_service_details -> %>
+            <div class="card mh-100 flex-shrink-1" style="min-height: 0px;">
+              <div class="card-header">
+                Service Details
+              </div>
+              <.form
+                style="overflow-y:auto;"
+                let={f}
+                for={:service_details}
+                phx-change="service_details_changes"
+              >
+                <%= label(f, :title, "Title") %>
+                <%= text_input(f, :title,
+                  class: "form-control m-1",
+                  value: @state.service_details.title
+                ) %>
+                <%= label(f, :subtitle1, "Subtitle 1") %>
+                <%= text_input(f, :subtitle1,
+                  class: "form-control m-1",
+                  value: @state.service_details.subtitle1
+                ) %>
+                <%= label(f, :subtitle2, "Subtitle 2") %>
+                <%= text_input(f, :subtitle2,
+                  class: "form-control m-1",
+                  value: @state.service_details.subtitle2
+                ) %>
+                <%= label(f, :timer_caption, "Timer Caption") %>
+                <%= text_input(f, :timer_caption,
+                  class: "form-control m-1",
+                  value: @state.service_details.timer_caption
+                ) %>
+                <%= label(f, :timer_destination, "Timer Destination") %>
+                <%= text_input(f, :timer_destination,
+                  class: "form-control m-1",
+                  value: @state.service_details.timer_destination
+                ) %>
+              </.form>
+            </div>
+            <div class="flex-grow-1" />
+          <% @editing_upcoming_services -> %>
+            <div class="card mh-100 flex-shrink-1" style="min-height: 0px;">
+              <div class="card-header">
+                Upcoming Services
+              </div>
+              <.form
+                style="overflow-y:auto;"
+                let={f}
+                for={:upcoming_services}
+                phx-change="upcoming_services_changes"
+              >
+                <%= label(f, :title1, "Title 1") %>
+                <%= text_input(f, :title1,
+                  class: "form-control m-1",
+                  value: @state.upcoming_services.title1
+                ) %>
+                <%= label(f, :title2, "Title 2") %>
+                <%= text_input(f, :title2,
+                  class: "form-control m-1",
+                  value: @state.upcoming_services.title2
+                ) %>
+              </.form>
+            </div>
+            <div class="flex-grow-1" />
+          <% @state.decks[@preview_deck_id] != nil and @editing -> %>
+            <div class="card h-100">
+              <.form
+                class="h-100 d-flex flex-column"
+                let={f}
+                for={:editing}
+                phx-submit="done-editing"
+                phx-change="editing-changes"
+              >
+                <div class="card-header d-flex flex-row align-items-center">
+                  <div class="flex-grow-1">Preview</div>
+                  <button class="btn btn-secondary m-1" type="submit">
+                    <i class="bi bi-pencil-fill" />
+                  </button>
+                  <button
+                    class="btn btn-outline-danger m-1"
+                    phx-click={
+                      JS.push("go_live",
+                        value: %{
+                          deck_id: @preview_deck_id,
+                          slide_id: @preview_slide_id,
+                          quiet: false
+                        }
+                      )
+                    }
+                  >
+                    <i class="bi bi-projector-fill" />
+                  </button>
+                  <button
+                    class="btn btn-outline-danger m-1"
+                    phx-click={
+                      JS.push("go_live",
+                        value: %{
+                          deck_id: @preview_deck_id,
+                          slide_id: @preview_slide_id,
+                          quiet: true
+                        }
+                      )
+                    }
+                  >
+                    <i class="bi bi-projector-fill" />
+                    <i class="bi bi-exclamation" />
+                  </button>
+                </div>
+                <div class="card-header" style="overflow-y: auto;">
+                  <div class="input-group input-group-sm mt-2 mb-2">
+                    <span class="input-group-text">Title</span>
+                    <%= text_input(f, :title,
+                      class: "form-control",
+                      value: @state.decks[@preview_deck_id].title
+                    ) %>
+                  </div>
+                  <div class="input-group input-group-sm mt-2 mb-2">
+                    <span class="input-group-text">Subtitle</span>
+                    <%= text_input(f, :subtitle,
+                      class: "form-control",
+                      value: @state.decks[@preview_deck_id].subtitle
+                    ) %>
+                  </div>
+                  <div class="input-group input-group-sm mt-2 mb-2">
+                    <span class="input-group-text">Heading</span>
+                    <%= select(
+                      f,
+                      :heading_style,
+                      [
+                        {"Default", :default},
+                        {"Hold", :hold},
+                        {"Skip", :skip},
+                        {"Quietly Skip", :quiet_skip}
+                      ],
+                      selected: @state.decks[@preview_deck_id].heading_style,
+                      class: "form-select"
+                    ) %>
+                  </div>
+                  <div class="input-group input-group-sm mt-2 mb-2">
+                    <span class="input-group-text">Style</span>
+                    <%= select(f, :style, [{"Lines", :lines}, {"Paragraphs", :paragraphs}],
+                      selected: @state.decks[@preview_deck_id].style,
+                      class: "form-select"
+                    ) %>
+                  </div>
+                  <div class="card mt-2 mb-2">
+                    <div class="card-header">
+                      <%= checkbox(f, :default_formatting,
+                        value: @state.decks[@preview_deck_id].formatting == :default,
+                        class: "form-check-input"
+                      ) %>
+                      <%= label(f, :default_formatting, "Default Formatting",
+                        class: "form-check-label"
+                      ) %>
+                    </div>
+                    <div class="card-body">
+                      <.formatting_controls
+                        f={f}
+                        formatting={
+                          Slides.Formatting.fill_default(
+                            @state.decks[@preview_deck_id].formatting,
+                            @state.default_formatting
+                          )
+                        }
+                        disabled={@state.decks[@preview_deck_id].formatting == :default}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <%= textarea(f, :body,
+                  class: "form-control flex-fill",
+                  style: "min-height: 50%;",
+                  value: Slides.to_editable(@state.decks[@preview_deck_id])
+                ) %>
+              </.form>
+            </div>
+          <% @state.decks[@preview_deck_id] != nil -> %>
+            <div class="card mh-100 flex-shrink-1" style="min-height: 0px;">
+              <div class="card-header d-flex flex-row align-items-center">
+                <div class="flex-grow-1">
+                  Preview: <%= @state.decks[@preview_deck_id].title %>
+                </div>
+                <button class="btn btn-outline-secondary m-1" phx-click="edit">
+                  <i class="bi bi-pencil-fill" />
+                </button>
+                <button
+                  class="btn btn-outline-danger m-1"
+                  phx-click={
+                    JS.push("go_live",
+                      value: %{
+                        deck_id: @preview_deck_id,
+                        slide_id: @preview_slide_id,
+                        quiet: false
+                      }
+                    )
+                  }
+                >
+                  <i class="bi bi-projector-fill" />
+                </button>
+                <button
+                  class="btn btn-outline-danger m-1"
+                  phx-click={
+                    JS.push("go_live",
+                      value: %{
+                        deck_id: @preview_deck_id,
+                        slide_id: @preview_slide_id,
+                        quiet: true
+                      }
+                    )
+                  }
+                >
+                  <i class="bi bi-projector-fill" />
+                  <i class="bi bi-exclamation" />
+                </button>
+              </div>
+              <ul class="list-group list-group-flush mh-100" style="overflow-y: auto;">
+                <li
+                  class={
+                    "list-group-item list-group-item-secondary #{if @preview_slide_id == "title", do: "active"}"
+                  }
+                  phx-click={JS.push("preview_slide", value: %{id: "title"})}
+                >
+                  <%= @state.decks[@preview_deck_id].title %>
+                </li>
+                <%= for {slide, id} <- Enum.with_index(@state.decks[@preview_deck_id].slides) do %>
+                  <li
+                    class={"list-group-item #{if @preview_slide_id == id, do: "active"}"}
+                    phx-click={JS.push("preview_slide", value: %{id: id})}
+                  >
+                    <%= Slides.to_string(@state.decks[@preview_deck_id].style, slide) %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+            <div class="flex-grow-1" />
+          <% true -> %>
+            <div class="card mh-100 flex-shrink-1" style="min-height: 0px;">
+              <div class="card-header d-flex flex-row align-items-center">
+                <div class="flex-grow-1">
+                  Preview: none
+                </div>
+              </div>
+            </div>
+            <div class="flex-grow-1" />
+        <% end %>
+      </div>
+      <div>
+        <div style={
+          "overflow: hidden; position: relative; width: 384px; height: #{if @preview_preview do
+            216
+          else
+            0
+          end}px; transition-property: height; transition-duration: 0.5s;"
+        }>
+          <div style="position: absolute; bottom: 0px; width: 384px; height: 216px;">
+            <img
+              src="images/preview_bg.jpg"
+              style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;"
+            />
+            <%= :erlang.pid_to_list(@pid) %>
+            <iframe
+              width="1920px"
+              height="1080px"
+              style="position: absolute; left: 0px; top: 0px; transform: scale(0.2); transform-origin: 0px 0px;"
+              src={"output.html?preview=#{:erlang.pid_to_list(@pid)}"}
+            />
+            <%= if Slides.previous_slide(@state.decks[@preview_deck_id], @preview_slide_id) != nil do %>
+              <div
+                class="bi bi-chevron-left m-1 next-prev-button"
+                style="left: 0px; color: white;"
+                phx-click={
+                  JS.push("preview_slide",
+                    value: %{
+                      id: Slides.previous_slide(@state.decks[@preview_deck_id], @preview_slide_id)
+                    }
+                  )
+                }
+              />
+            <% else %>
+              <div
+                class="bi bi-chevron-left m-1 next-prev-button"
+                style="left: 0px; color: grey;"
+              />
+            <% end %>
+            <%= if Slides.next_slide(@state.decks[@preview_deck_id], @preview_slide_id) != nil do %>
+              <div
+                class="bi bi-chevron-right m-1 next-prev-button"
+                style="right: 0px; color: white;"
+                phx-click={
+                  JS.push("preview_slide",
+                    value: %{
+                      id: Slides.next_slide(@state.decks[@preview_deck_id], @preview_slide_id)
+                    }
+                  )
+                }
+              />
+            <% else %>
+              <div
+                class="bi bi-chevron-right m-1 next-prev-button"
+                style="right: 0px; color: grey;"
+              />
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col mh-100 d-flex flex-column">
+      <div class="card flex-shrink-1" style="min-height: 0px;">
+        <%= if @state.live_deck do %>
+          <div class="card-header d-flex flex-row align-items-center">
+            <div class="flex-grow-1">
+              Live: <%= @state.live_deck.title %>
+            </div>
+            <button class="btn btn-outline-primary m-1" phx-click="close_live">Close</button>
+          </div>
+          <ul class="list-group list-group-flush mh-100" style="overflow-y: auto;">
+            <li
+              class={
+                "list-group-item list-group-item-secondary #{if @state.live_slide_id == "title", do: "active"}"
+              }
+              phx-click={JS.push("live_slide", value: %{id: "title"})}
+            >
+              <%= @state.live_deck.title %>
+            </li>
+            <%= for {slide, id} <- Enum.with_index(@state.live_deck.slides) do %>
+              <li
+                class={"list-group-item #{if @state.live_slide_id == id, do: "active"}"}
+                phx-click={JS.push("live_slide", value: %{id: id})}
+              >
+                <%= Slides.to_string(@state.live_deck.style, slide) %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="card-header d-flex flex-row align-items-center">
+            <div class="flex-grow-1">
+              Live: none
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <div class="flex-grow-1" />
+      <div>
+        <div style={
+          "overflow: hidden; position: relative; width: 384px; height: #{if @live_preview do
+            216
+          else
+            0
+          end}px; transition-property: height; transition-duration: 0.5s;"
+        }>
+          <div style="position: absolute; bottom: 0px; width: 384px; height: 216px;">
+            <img
+              src="images/preview_bg.jpg"
+              style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;"
+            />
+            <iframe
+              width="1920px"
+              height="1080px"
+              style="position: absolute; left: 0px; top: 0px; transform: scale(0.2); transform-origin: 0px 0px;"
+              src="output.html"
+            />
+            <%= if Slides.previous_slide(@state.live_deck, @state.live_slide_id) != nil do %>
+              <div
+                class="bi bi-chevron-left m-1 next-prev-button"
+                style="left: 0px; color: white;"
+                phx-click={
+                  JS.push("live_slide",
+                    value: %{id: Slides.previous_slide(@state.live_deck, @state.live_slide_id)}
+                  )
+                }
+              />
+            <% else %>
+              <div
+                class="bi bi-chevron-left m-1 next-prev-button"
+                style="left: 0px; color: grey;"
+              />
+            <% end %>
+            <%= if Slides.next_slide(@state.live_deck, @state.live_slide_id) != nil do %>
+              <div
+                class="bi bi-chevron-right m-1 next-prev-button"
+                style="right: 0px; color: white;"
+                phx-click={
+                  JS.push("live_slide",
+                    value: %{id: Slides.next_slide(@state.live_deck, @state.live_slide_id)}
+                  )
+                }
+              />
+            <% else %>
+              <div
+                class="bi bi-chevron-right m-1 next-prev-button"
+                style="right: 0px; color: grey;"
+              />
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class={"my-modal #{if @modal == :bible_version, do: "show"}"}
+  phx-click-away={if @modal == :bible_version, do: "hide_modal"}
+  tabindex="-1"
+>
+  <div class="modal-header">
+    <h5 class="modal-title">Add Bible Version</h5>
+    <button type="button" class="btn-close" phx-click="hide_modal" />
+  </div>
+  <.form let={f} for={:bible} phx-submit="add_bible_version">
+    <div class="my-modal-body">
+      <%= label(f, :id, "Id: ") %>
+      <%= text_input(f, :id, class: "form-control") %>
+      <%= label(f, :path, "Path: ") %>
+      <%= text_input(f, :path, class: "form-control") %>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" phx-click="hide_modal">Close</button>
+      <button class="btn btn-primary" type="submit" phx-click="hide_modal">Add</button>
+    </div>
+  </.form>
+</div>
+
+<div
+  class={"my-modal #{if @modal == :settings, do: "show"}"}
+  phx-click-away={if @modal == :settings, do: "hide_modal"}
+  tabindex="-1"
+>
+  <div class="modal-header">
+    <h5 class="modal-title">Settings</h5>
+    <button type="button" class="btn-close" phx-click="hide_modal" />
+  </div>
+  <div class="my-modal-body">
+    <.form let={f} for={:previews} phx-change="previews">
+      <label>
+        <%= checkbox(f, :preview,
+          checked: @preview_preview,
+          class: "form-check-input"
+        ) %>
+        <%= label(f, :preview, "Preview preview", class: "form-check-label") %>
+      </label>
+      <br />
+      <label>
+        <%= checkbox(f, :live,
+          checked: @live_preview,
+          class: "form-check-input"
+        ) %>
+        <%= label(f, :live, "Live preview", class: "form-check-label") %>
+      </label>
+    </.form>
+    <hr />
+    <.form let={f} for={:default_formatting} phx-change="default_formatting">
+      <.formatting_controls f={f} formatting={@state.default_formatting} disabled={false} />
+    </.form>
+    <hr />
+    <button type="button" class="btn btn-secondary me-auto" phx-click="show_bible_version_modal">
+      Add Bible Version
+    </button>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" phx-click="hide_modal">Close</button>
+  </div>
+</div>
+
+<div
+  class={"my-modal #{if @modal == :bible, do: "show"}"}
+  phx-click-away={if @modal == :bible, do: "hide_modal"}
+  tabindex="-1"
+>
+  <div class="modal-header">
+    <h5 class="modal-title">Add Bible Reading</h5>
+    <button type="button" class="btn-close" phx-click="hide_modal"></button>
+  </div>
+  <.form let={f} for={:bible} phx-submit="add_bible">
+    <div class="my-modal-body">
+      <%= select(f, :version, Enum.map(@bible_versions, fn {id, _} -> {id, id} end),
+        class: "form-select"
+      ) %>
+      <%= label(f, :ref, "Ref: ") %>
+      <%= text_input(f, :ref, class: "form-control") %>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary me-auto" phx-click="show_bible_version_modal">
+        Add Bible Version
+      </button>
+      <button type="button" class="btn btn-secondary" phx-click="hide_modal">Close</button>
+      <button type="submit" class="btn btn-primary" phx-click="hide_modal">Add</button>
+    </div>
+  </.form>
+</div>
+
+<div
+  class={"my-modal #{if @modal == :psalm, do: "show"}"}
+  phx-click-away={if @modal == :psalm, do: "hide_modal"}
+  tabindex="-1"
+>
+  <div class="modal-header">
+    <h5 class="modal-title">Add Psalm</h5>
+    <button type="button" class="btn-close" phx-click="hide_modal"></button>
+  </div>
+  <.form let={f} for={:psalm} phx-submit="add_psalm">
+    <div class="my-modal-body">
+      <%= select(f, :version, Enum.map(@psalters, fn {id, _} -> {id, id} end),
+        class: "form-select"
+      ) %>
+      <%= label(f, :psalm_num, "Psalm: ") %>
+      <%= text_input(f, :psalm_num, class: "form-control") %>
+      <%= label(f, :verse_start, "From: ") %>
+      <%= text_input(f, :verse_start, class: "form-control", value: "1") %>
+      <%= label(f, :verse_end, "To: ") %>
+      <%= text_input(f, :verse_end, class: "form-control", value: "end") %>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" phx-click="hide_modal">Close</button>
+      <button type="submit" class="btn btn-primary" phx-click="hide_modal">Add</button>
+    </div>
+  </.form>
+</div>
+
+<div class={"my-modal-backdrop #{if @modal, do: "show"}"} />
