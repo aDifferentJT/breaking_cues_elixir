@@ -41,3 +41,5 @@ npm-debug.log
 
 # Ignore release files
 /rel/
+
+*.DS_Store

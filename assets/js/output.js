@@ -416,12 +416,32 @@ setInterval(() => {
 }, 1000);
 
 function update_service_details({
-    "title": title,
-    "subtitle1": subtitle1,
-    "subtitle2": subtitle2,
-    "timer_caption": timer_caption,
-    "timer_destination": timer_destination_str,
+    "service_details": {
+        "title": title,
+        "subtitle1": subtitle1,
+        "subtitle2": subtitle2,
+        "timer_caption": timer_caption,
+        "timer_destination": timer_destination_str,
+        "formatting": _formatting,
+    },
+    "default_formatting": default_formatting,
 }) {
+    const {
+        "bg_colour": bg_colour,
+        "bg_alpha": bg_alpha,
+        "text_colour": text_colour,
+        "text_alpha": text_alpha,
+    } =
+    function() {
+        if (_formatting == "default") {
+            return default_formatting;
+        } else {
+            return _formatting;
+        }
+    }();
+
+    document.getElementById("arch_bg").style.background = `radial-gradient(ellipse farthest-side at 50% 100%, transparent 50%, ${colour_with_alpha(bg_colour, bg_alpha)} 75%)`;
+    document.getElementById("arch").style.color = colour_with_alpha(text_colour, text_alpha);
     document.getElementById("service_title").textContent = title;
     document.getElementById("subtitle1").textContent = subtitle1;
     document.getElementById("subtitle2").textContent = subtitle2;

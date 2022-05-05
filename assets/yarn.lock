@@ -148,11 +148,11 @@
 
 "phoenix_live_view@file:../deps/phoenix_live_view":
   "resolved" "file:../deps/phoenix_live_view"
-  "version" "0.17.5"
+  "version" "0.17.9"
 
 "phoenix@file:../deps/phoenix":
   "resolved" "file:../deps/phoenix"
-  "version" "1.6.2"
+  "version" "1.6.7"
 
 "picomatch@^2.0.4", "picomatch@^2.2.1":
   "integrity" "sha512-lY1Q/PiJGC2zOv/z391WOTD+Z02bCgsFfvxoXXf6h7kv9o+WmsmzYqrAwY63sNgOxE4xEdq0WyUnXfKeBrSvYw=="

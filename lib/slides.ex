@@ -140,7 +140,8 @@ defmodule Slides do
               subtitle1: "Subtitle 1",
               subtitle2: "Subtitle 2",
               timer_caption: "The service begins in",
-              timer_destination: ""
+              timer_destination: "",
+              formatting: :default
   end
 
   defmodule UpcomingServices do
@@ -240,10 +241,18 @@ defmodule Slides do
     GenServer.call(__MODULE__, :get_service_details)
   end
 
-  def set_service_details(title, subtitle1, subtitle2, timer_caption, timer_destination) do
+  def set_service_details(
+        title,
+        subtitle1,
+        subtitle2,
+        timer_caption,
+        timer_destination,
+        formatting
+      ) do
     GenServer.cast(
       __MODULE__,
-      {:set_service_details, title, subtitle1, subtitle2, timer_caption, timer_destination}
+      {:set_service_details, title, subtitle1, subtitle2, timer_caption, timer_destination,
+       formatting}
     )
   end
 
@@ -716,7 +725,7 @@ defmodule Slides do
 
   @impl true
   def handle_cast(
-        {:set_service_details, title, subtitle1, subtitle2, timer_caption, timer_destination},
+        {:set_service_details, title, subtitle1, subtitle2, timer_caption, timer_destination, formatting},
         %State{service_details: service_details} = state
       ) do
     service_details = %ServiceDetails{
@@ -724,7 +733,8 @@ defmodule Slides do
       subtitle1: subtitle1,
       subtitle2: subtitle2,
       timer_caption: timer_caption,
-      timer_destination: timer_destination
+      timer_destination: timer_destination,
+      formatting: formatting
     }
 
     state = %{state | service_details: service_details}
@@ -758,15 +768,22 @@ defmodule Slides do
   @impl true
   def handle_cast(
         :toggle_service_details,
-        %State{service_details: service_details, service_details_shown: service_details_shown} =
-          state
+        %State{
+          default_formatting: default_formatting,
+          service_details: service_details,
+          service_details_shown: service_details_shown
+        } = state
       ) do
     service_details_shown = !service_details_shown
     state = %{state | service_details_shown: service_details_shown}
 
     if service_details_shown do
       hide_upcoming_services()
-      BreakingCuesWeb.OutputChannel.broadcast_msg("service_details", service_details)
+
+      BreakingCuesWeb.OutputChannel.broadcast_msg("service_details", %{
+        service_details: service_details,
+        default_formatting: default_formatting
+      })
     end
 
     BreakingCuesWeb.OutputChannel.broadcast_msg("service_details_shown", %{

@@ -204,6 +204,29 @@
                   class: "form-control m-1",
                   value: @state.service_details.timer_destination
                 ) %>
+                <div class="card mt-2 mb-2">
+                  <div class="card-header">
+                    <%= checkbox(f, :default_formatting,
+                      value: @state.service_details.formatting == :default,
+                      class: "form-check-input"
+                    ) %>
+                    <%= label(f, :default_formatting, "Default Formatting",
+                      class: "form-check-label"
+                    ) %>
+                  </div>
+                  <div class="card-body">
+                    <.formatting_controls
+                      f={f}
+                      formatting={
+                        Slides.Formatting.fill_default(
+                          @state.service_details.formatting,
+                          @state.default_formatting
+                        )
+                      }
+                      disabled={@state.service_details.formatting == :default}
+                    />
+                  </div>
+                </div>
               </.form>
             </div>
             <div class="flex-grow-1" />

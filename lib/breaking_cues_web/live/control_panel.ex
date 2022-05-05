@@ -534,17 +534,58 @@ defmodule BreakingCuesWeb.ControlPanel do
   def handle_event(
         "service_details_changes",
         %{
-          "service_details" => %{
+          "service_details" => changes = %{
             "title" => title,
             "subtitle1" => subtitle1,
             "subtitle2" => subtitle2,
             "timer_caption" => timer_caption,
-            "timer_destination" => timer_destination
+            "timer_destination" => timer_destination,
+            "default_formatting" => default_formatting
           }
         },
         socket
       ) do
-    Slides.set_service_details(title, subtitle1, subtitle2, timer_caption, timer_destination)
+    formatting =
+      case {default_formatting, changes} do
+        {"true", _} ->
+          :default
+
+        {"false",
+         %{
+           "bg_colour" => bg_colour,
+           "bg_alpha" => bg_alpha,
+           "text_colour" => text_colour,
+           "text_alpha" => text_alpha,
+           "lines_size" => lines_size,
+           "paragraphs_size" => paragraphs_size
+         }} ->
+          {bg_alpha, ""} = Integer.parse(bg_alpha)
+          {text_alpha, ""} = Integer.parse(text_alpha)
+          {lines_size, ""} = Integer.parse(lines_size)
+          {paragraphs_size, ""} = Integer.parse(paragraphs_size)
+
+          %Slides.Formatting{
+            bg_colour: bg_colour,
+            bg_alpha: bg_alpha,
+            text_colour: text_colour,
+            text_alpha: text_alpha,
+            lines_size: lines_size,
+            paragraphs_size: paragraphs_size
+          }
+
+        {"false", _} ->
+          %Slides.Formatting{}
+      end
+
+    Slides.set_service_details(
+      title,
+      subtitle1,
+      subtitle2,
+      timer_caption,
+      timer_destination,
+      formatting
+    )
+
     {:noreply, socket}
   end
 
@@ -629,7 +670,11 @@ defmodule BreakingCuesWeb.ControlPanel do
       default_formatting: default_formatting
     })
 
-    BreakingCuesWeb.OutputChannel.broadcast_preview_msg("service_details", service_details)
+    BreakingCuesWeb.OutputChannel.broadcast_preview_msg("service_details", %{
+      service_details: service_details,
+      default_formatting: default_formatting
+    })
+
     BreakingCuesWeb.OutputChannel.broadcast_preview_msg("upcoming_services", upcoming_services)
 
     socket = socket |> assign(:state, state)
