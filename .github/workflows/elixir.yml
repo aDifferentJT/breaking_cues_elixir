@@ -35,46 +35,50 @@ jobs:
         path: deps
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-
-
-    - name: setup-msbuild
-      if: runner.os == 'Windows'
-      uses: microsoft/setup-msbuild@v1.1
         
     - name: Install dependencies
+      shell: bash
       run: mix deps.get --only prod
       
     - name: Compile
       env:
         MIX_ENV: prod
+      shell: bash
       run: mix compile
       
     - name: Deploy assets
       env:
         MIX_ENV: prod
+      shell: bash
       run: mix assets.deploy
       
     - name: Add phoenix to release
       env:
         MIX_ENV: prod
+      shell: bash
       run: mix phx.gen.release
       
     - name: Build release
       env:
         MIX_ENV: prod
+      shell: bash
       run: mix release
       
     - name: ls
+      shell: bash
       run: |
         ls _build/prod/rel
         
     - name: Get artifacts (Linux)
       if: runner.os == 'Linux'
+      shell: bash
       run: |
         mkdir release
         tar -cjf release/breaking_cues_${{runner.os}}.tar.bz2 _build/prod/rel/breaking_cues
             
     - name: Get artifacts (Windows)
       if: runner.os == 'Windows'
+      shell: bash
       run: |
         mkdir release
         7z a -tzip release/breaking_cues_${{runner.os}}.zip _build/prod/rel/breaking_cues
